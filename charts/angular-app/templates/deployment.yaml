@@ -1,0 +1,25 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: {{ template "angular-app.fullname" . }}
+  labels:
+    app: {{ template "angular-app.name" . }}
+    chart: {{ .Chart.Name }}-{{ .Chart.Version | replace "+" "_" }}
+    release: {{ .Release.Name }}
+    heritage: {{ .Release.Service }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  template:
+    metadata:
+      labels:
+        app: {{ template "angular-app.name" . }}
+        release: {{ .Release.Name }}
+    spec:
+      containers:
+        {{- range $containerName, $containerSpec := .Values.deployment.containers }}
+        - name: {{ $containerName }}
+          image: "{{ $.Values.image.repository }}/{{ $containerName }}"
+          imagePullPolicy: {{ $.Values.image.pullPolicy }}
+          ports:
+            - containerPort: {{ $containerSpec.internalPort }}
+        {{- end -}}
